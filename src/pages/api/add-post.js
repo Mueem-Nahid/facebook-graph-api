@@ -1,5 +1,5 @@
 import axios from "axios";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -12,15 +12,20 @@ export default async function handler(req, res) {
     const data = req.body;
 
     const response = await axios.post(
-        `${FACEBOOK_GRAPH_API_URL}/${PAGE_ID}/feed?message=${data}&access_token=${PAGE_ACCESS_TOKEN}`
+      `${FACEBOOK_GRAPH_API_URL}/${PAGE_ID}/feed?message=${data}&access_token=${PAGE_ACCESS_TOKEN}`,
     );
 
     if (response.status === 200) {
-      console.log('Post created successfully:', response.data);
-      res.status(201).json({ message: 'Post created successfully' });
+      res.status(201).json({
+        data: response.data,
+        message: "Post created successfully",
+      });
     }
   } catch (e) {
-    console.log("==========" , e)
-    res.status(500).json({ message: 'Server error' });
+    console.log("==========", e);
+    res.status(500).json({
+      data: {},
+      message: e?.message,
+    });
   }
 }

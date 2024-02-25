@@ -1,19 +1,17 @@
+import axios from "axios";
+
 export const addPost = async (payload) => {
-    try {
-        const response = await fetch('/api/add-post', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Error adding post:', error);
+  try {
+    const response = await axios.post("/api/add-post", payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response?.status === 201) {
+      return response?.data;
     }
+  } catch (error) {
+    console.error("Error adding post:", error);
+    return error;
+  }
 };
