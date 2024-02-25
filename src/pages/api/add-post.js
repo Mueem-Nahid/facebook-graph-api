@@ -1,5 +1,6 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import { addMinutes } from "date-fns";
 
 dotenv.config();
 
@@ -9,10 +10,38 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 export default async function handler(req, res) {
   try {
-    const data = req.body;
+    const { message, link, scheduledPublishTime } = req.body;
+    let data;
+    if (scheduledPublishTime === "0") {
+      data = {
+        message,
+        link,
+        published: true,
+      };
+    } else {
+      const now = new Date();
+      const fiveMinutesFromNow = addMinutes(now, Number(scheduledPublishTime));
+      const scheduledUnixPublishTime = Math.floor(
+        fiveMinutesFromNow.getTime() / 1000,
+      );
+      data = {
+        message,
+        link,
+        published: false,
+        scheduled_publish_time: scheduledUnixPublishTime,
+      };
+      console.log("data->", data);
+    }
 
     const response = await axios.post(
-      `${FACEBOOK_GRAPH_API_URL}/${PAGE_ID}/feed?message=${data}&access_token=${PAGE_ACCESS_TOKEN}`,
+      `${FACEBOOK_GRAPH_API_URL}/${PAGE_ID}/feed`,
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${PAGE_ACCESS_TOKEN}`,
+        },
+      },
     );
 
     if (response.status === 200) {
@@ -22,10 +51,10 @@ export default async function handler(req, res) {
       });
     }
   } catch (e) {
-    console.log("==========", e);
+    console.log("==========", e?.response?.data?.error?.message);
     res.status(500).json({
       data: {},
-      message: e?.message,
+      message: e?.response?.data?.error?.message ?? e,
     });
   }
 }

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export const addPost = async (payload) => {
   try {
@@ -8,10 +9,10 @@ export const addPost = async (payload) => {
       },
     });
     if (response?.status === 201) {
+      toast.success(response?.data?.message);
       return response?.data;
     }
   } catch (error) {
-    console.error("Error adding post:", error);
-    return error;
+    toast.error(`Failed to post: ${error?.response?.data?.message}`);
   }
 };

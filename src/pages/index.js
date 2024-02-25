@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import { useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { addPost } from "@/services/post";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -8,20 +8,18 @@ import { signIn, signOut, useSession } from "next-auth/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const [post, setPost] = useState("");
+  const [post, setPost] = useState({
+    message: "",
+    link: "",
+    scheduledPublishTime: "0",
+  });
   const { data: session } = useSession();
 
   console.log(session);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = await addPost(post);
-    if (data?.status === 200) {
-      toast.success("Post created!");
-    } else {
-      console.log(data);
-      toast.error(`Failed to post: ${data?.message}`);
-    }
+    await addPost(post);
   };
 
   return (
@@ -58,12 +56,41 @@ export default function Home() {
               Post:
             </label>
             <textarea
-              onChange={(e) => setPost(e.target.value)}
+              onChange={(e) => setPost({ ...post, message: e.target.value })}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="post"
               type="text"
               placeholder="Share your post..."
             />
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="link"
+            >
+              Link:
+            </label>
+            <input
+              onChange={(e) => setPost({ ...post, link: e.target.value })}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              id="link"
+              type="text"
+              placeholder="Share post link"
+            />
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="schedule"
+            >
+              Schedule:
+            </label>
+            <select
+              onChange={(e) =>
+                setPost({ ...post, scheduledPublishTime: e.target.value })
+              }
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+              id="schedule"
+            >
+              <option value="0">Instant post</option>
+              <option value="15">Post after 15 minutes</option>
+            </select>
           </div>
           <div className="flex items-center justify-between">
             <button
@@ -76,6 +103,11 @@ export default function Home() {
           </div>
         </form>
         <ToastContainer />
+      </div>
+      <div className="mt-5">
+        <a href="https://www.facebook.com/profile.php?id=61557021800663">
+          Page link: https://www.facebook.com/profile.php?id=61557021800663
+        </a>
       </div>
     </main>
   );
